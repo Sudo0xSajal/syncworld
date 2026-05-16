@@ -1,0 +1,1517 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>SyncWorld Together — Innovative Software for a Connected World</title>
+<meta name="description" content="SyncWorld Together builds secure, scalable, and beautifully engineered products for communication, cybersecurity, and productivity. Founded by Sajal Haldar."/>
+<meta property="og:title" content="SyncWorld Together | syncworld.tech"/>
+<meta property="og:description" content="Building the future of digital innovation — security-first software by Sajal Haldar."/>
+<meta property="og:url" content="https://syncworld.tech"/>
+<meta name="theme-color" content="#04040c"/>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@200;300;400;600;700;800&family=JetBrains+Mono:ital,wght@0,300;0,400;0,500;1,400&display=swap" rel="stylesheet"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<style>
+/* ══════ TOKENS ══════ */
+:root{
+  --bg:#04040c;--surface:#090916;--surface2:#0e0e24;
+  --blue:#1e90ff;--blue2:#00bfff;--cyan:#06ffd8;
+  --purple:#7c3aed;--violet:#a855f7;--red:#ff2d55;
+  --green:#00e878;--amber:#f59e0b;
+  --text:#eeeeff;--muted:#5a5a88;--dimmed:#3a3a60;
+  --border:rgba(100,100,200,0.13);--border2:rgba(100,100,200,0.22);
+  --font:'Sora',sans-serif;--mono:'JetBrains Mono',monospace;
+  --r8:8px;--r12:12px;--r16:16px;--r20:20px;--r-full:9999px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth;font-size:16px}
+body{
+  background:var(--bg);color:var(--text);
+  font-family:var(--font);overflow-x:hidden;
+  -webkit-font-smoothing:antialiased;cursor:none;
+}
+::selection{background:rgba(30,144,255,0.3);color:#fff}
+::-webkit-scrollbar{width:3px}
+::-webkit-scrollbar-track{background:var(--bg)}
+::-webkit-scrollbar-thumb{background:linear-gradient(var(--blue),var(--cyan));border-radius:2px}
+
+/* ══════ CURSOR ══════ */
+#cur{position:fixed;width:10px;height:10px;background:var(--cyan);border-radius:50%;
+  pointer-events:none;z-index:9999;transform:translate(-50%,-50%);
+  transition:width .15s,height .15s,background .15s;mix-blend-mode:screen}
+#cur-r{position:fixed;width:32px;height:32px;border:1px solid rgba(6,255,216,0.4);
+  border-radius:50%;pointer-events:none;z-index:9998;transform:translate(-50%,-50%);
+  transition:width .2s,height .2s}
+body.hover-active #cur{width:18px;height:18px;background:var(--blue)}
+body.hover-active #cur-r{width:48px;height:48px;border-color:rgba(30,144,255,0.5)}
+
+/* ══════ NOISE ══════ */
+body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
+  opacity:.5}
+
+/* ══════ TICKER ══════ */
+.ticker{
+  background:linear-gradient(90deg,rgba(30,144,255,0.07),rgba(6,255,216,0.07));
+  border-bottom:1px solid var(--border);
+  padding:.45rem 0;overflow:hidden;white-space:nowrap;position:relative;z-index:100;
+}
+.ticker-inner{display:inline-flex;gap:3rem;animation:tick 30s linear infinite}
+.ticker-item{font-family:var(--mono);font-size:.7rem;letter-spacing:.06em;
+  color:var(--muted);display:flex;align-items:center;gap:.5rem}
+.ticker-dot{width:5px;height:5px;border-radius:50%;flex-shrink:0}
+.tick-green{background:var(--green);box-shadow:0 0 6px var(--green)}
+.tick-blue{background:var(--blue);box-shadow:0 0 6px var(--blue)}
+.tick-red{background:var(--red);box-shadow:0 0 6px var(--red)}
+.tick-val{color:var(--cyan);font-weight:500}
+@keyframes tick{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+
+/* ══════ HEADER ══════ */
+header{
+  position:fixed;top:0;left:0;right:0;z-index:900;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:1rem 2.5rem;
+  transition:background .5s,backdrop-filter .5s,border .5s;
+}
+header.solid{
+  background:rgba(4,4,12,0.75);
+  backdrop-filter:blur(24px) saturate(180%);
+  border-bottom:1px solid var(--border);
+}
+.logo{display:flex;align-items:center;gap:.7rem;text-decoration:none;color:var(--text)}
+.logo-mark{
+  width:34px;height:34px;border-radius:9px;
+  background:linear-gradient(135deg,var(--blue),var(--cyan));
+  display:flex;align-items:center;justify-content:center;
+  font-size:.75rem;font-weight:800;color:#000;letter-spacing:-.03em;
+  box-shadow:0 0 20px rgba(30,144,255,0.5),inset 0 1px 0 rgba(255,255,255,0.2);
+}
+.logo-text{font-size:1.05rem;font-weight:700;letter-spacing:-.03em}
+.logo-text span{color:var(--cyan)}
+nav.desk{display:flex;align-items:center;gap:1.8rem}
+nav.desk a{font-size:.82rem;color:var(--muted);text-decoration:none;
+  letter-spacing:.02em;transition:color .2s;position:relative}
+nav.desk a:hover{color:var(--text)}
+nav.desk a::after{content:'';position:absolute;left:0;bottom:-3px;right:0;
+  height:1px;background:var(--cyan);transform:scaleX(0);transform-origin:left;
+  transition:transform .25s}
+nav.desk a:hover::after{transform:scaleX(1)}
+.hdr-right{display:flex;align-items:center;gap:1rem}
+.badge-founder{
+  display:flex;align-items:center;gap:.4rem;
+  padding:.3rem .8rem;border-radius:var(--r-full);
+  background:rgba(124,58,237,0.12);border:1px solid rgba(124,58,237,0.25);
+  font-size:.68rem;font-family:var(--mono);color:var(--violet);
+}
+.btn-launch{
+  padding:.5rem 1.2rem;border-radius:var(--r8);
+  background:linear-gradient(135deg,var(--blue),var(--purple));
+  color:#fff;text-decoration:none;font-size:.8rem;font-weight:600;
+  box-shadow:0 0 20px rgba(30,144,255,0.35);
+  transition:transform .2s,box-shadow .2s;white-space:nowrap;
+}
+.btn-launch:hover{transform:translateY(-2px);box-shadow:0 0 36px rgba(30,144,255,0.6)}
+.ham{display:none;flex-direction:column;gap:5px;background:none;border:none;cursor:none;padding:4px}
+.ham span{display:block;width:22px;height:1.5px;background:var(--text);border-radius:2px;transition:.3s}
+
+/* ══════ MOBILE NAV ══════ */
+.mob-nav{
+  display:none;position:fixed;inset:0;
+  background:rgba(4,4,12,0.97);backdrop-filter:blur(30px);
+  z-index:800;flex-direction:column;align-items:center;justify-content:center;gap:2rem;
+}
+.mob-nav.on{display:flex}
+.mob-nav a{font-size:1.6rem;font-weight:700;color:var(--text);text-decoration:none;
+  letter-spacing:-.03em;transition:color .2s}
+.mob-nav a:hover{color:var(--cyan)}
+.mob-close{position:absolute;top:1.5rem;right:2rem;background:none;border:none;
+  color:var(--muted);font-size:1.6rem;cursor:none}
+
+/* ══════ HERO ══════ */
+#hero{position:relative;min-height:100vh;display:flex;align-items:center;
+  justify-content:center;overflow:hidden;padding-top:90px}
+#c3d{position:absolute;inset:0;z-index:0}
+.grid-bg{
+  position:absolute;inset:0;
+  background-image:
+    linear-gradient(rgba(30,144,255,0.035) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(30,144,255,0.035) 1px,transparent 1px);
+  background-size:72px 72px;
+  -webkit-mask-image:radial-gradient(ellipse 80% 60% at 50% 50%,black,transparent);
+  mask-image:radial-gradient(ellipse 80% 60% at 50% 50%,black,transparent);
+  z-index:1;pointer-events:none;
+}
+.hero-inner{position:relative;z-index:3;text-align:center;
+  max-width:900px;padding:2rem 1.5rem;margin:0 auto}
+.hero-chip{
+  display:inline-flex;align-items:center;gap:.5rem;
+  padding:.35rem 1.1rem;border-radius:var(--r-full);
+  background:rgba(6,255,216,0.07);border:1px solid rgba(6,255,216,0.2);
+  font-family:var(--mono);font-size:.72rem;letter-spacing:.1em;
+  color:var(--cyan);margin-bottom:2rem;
+  animation:chipGlow 4s ease infinite;
+}
+.hero-chip::before{content:'';width:6px;height:6px;border-radius:50%;
+  background:var(--cyan);animation:pulse2 2s ease infinite;flex-shrink:0}
+@keyframes chipGlow{0%,100%{box-shadow:0 0 0 0 rgba(6,255,216,0.2)}50%{box-shadow:0 0 30px rgba(6,255,216,0.15)}}
+@keyframes pulse2{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.3;transform:scale(.8)}}
+.h1{
+  font-size:clamp(2.6rem,6.5vw,5.8rem);font-weight:800;
+  line-height:1.04;letter-spacing:-.05em;margin-bottom:1.6rem;
+}
+.h1 .line1{
+  display:block;
+  background:linear-gradient(95deg,#fff 20%,var(--blue2) 55%,var(--cyan) 90%);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+}
+.h1 .line2{
+  display:block;
+  background:linear-gradient(95deg,var(--violet) 0%,var(--blue) 60%,#fff 100%);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+}
+.hero-sub{font-size:clamp(.95rem,1.8vw,1.15rem);color:var(--muted);
+  line-height:1.75;max-width:560px;margin:0 auto 2.5rem;font-weight:300}
+.hero-ctas{display:flex;gap:1rem;justify-content:center;flex-wrap:wrap;margin-bottom:3rem}
+.btn-p{
+  padding:.85rem 2.2rem;border-radius:var(--r12);
+  background:linear-gradient(135deg,var(--blue),var(--cyan));
+  color:#000;font-weight:800;font-size:.92rem;text-decoration:none;
+  box-shadow:0 0 40px rgba(6,255,216,0.3);
+  transition:transform .2s,box-shadow .2s;
+}
+.btn-p:hover{transform:translateY(-3px);box-shadow:0 0 60px rgba(6,255,216,0.55)}
+.btn-s{
+  padding:.85rem 2.2rem;border-radius:var(--r12);
+  background:rgba(255,255,255,0.04);border:1px solid var(--border2);
+  color:var(--text);font-size:.92rem;font-weight:600;text-decoration:none;
+  backdrop-filter:blur(10px);transition:transform .2s,background .2s,border-color .2s;
+}
+.btn-s:hover{transform:translateY(-3px);background:rgba(255,255,255,0.07);border-color:rgba(30,144,255,0.4)}
+
+/* trust strip */
+.trust-strip{display:flex;align-items:center;justify-content:center;gap:2rem;
+  flex-wrap:wrap;padding:.8rem 1.5rem;
+  background:rgba(255,255,255,0.025);border:1px solid var(--border);
+  border-radius:var(--r12);backdrop-filter:blur(12px);
+  max-width:580px;margin:0 auto;}
+.trust-item{display:flex;align-items:center;gap:.45rem;font-size:.75rem;color:var(--muted);font-family:var(--mono)}
+.trust-item span:first-child{font-size:.9rem}
+
+/* floating cards */
+.fcards{position:absolute;inset:0;pointer-events:none;z-index:2}
+.fc{
+  position:absolute;padding:.85rem 1.1rem;
+  background:rgba(9,9,22,0.85);border:1px solid var(--border2);
+  border-radius:var(--r12);backdrop-filter:blur(20px);
+  font-family:var(--mono);font-size:.72rem;
+  box-shadow:0 8px 32px rgba(0,0,0,0.5),inset 0 1px 0 rgba(255,255,255,0.04);
+  min-width:160px;
+}
+.fc .lbl{color:var(--muted);font-size:.6rem;letter-spacing:.1em;margin-bottom:.25rem}
+.fc .val{font-size:.85rem;font-weight:500}
+.fc-1{top:18%;left:4%;animation:fl1 8s ease-in-out infinite}
+.fc-2{top:22%;right:4%;animation:fl2 9s ease-in-out infinite .5s}
+.fc-3{bottom:24%;left:5%;animation:fl1 7s ease-in-out infinite 1s}
+.fc-4{bottom:28%;right:5%;animation:fl2 10s ease-in-out infinite 1.5s}
+@keyframes fl1{0%,100%{transform:translateY(0) rotate(-1deg)}50%{transform:translateY(-16px) rotate(.5deg)}}
+@keyframes fl2{0%,100%{transform:translateY(0) rotate(1deg)}50%{transform:translateY(-12px) rotate(-.5deg)}}
+.g-dot{display:inline-block;width:6px;height:6px;border-radius:50%;
+  background:var(--green);box-shadow:0 0 8px var(--green);margin-right:.4rem;animation:pulse2 2s ease infinite}
+.scroll-hint{position:absolute;bottom:2.5rem;left:50%;transform:translateX(-50%);
+  display:flex;flex-direction:column;align-items:center;gap:.4rem;
+  color:var(--dimmed);font-size:.65rem;letter-spacing:.15em;font-family:var(--mono);
+  animation:sh 3s ease infinite}
+.scroll-line{width:1px;height:48px;background:linear-gradient(var(--cyan),transparent)}
+@keyframes sh{0%,100%{transform:translateX(-50%) translateY(0);opacity:.5}50%{transform:translateX(-50%) translateY(10px);opacity:1}}
+
+/* ══════ STATS MARQUEE ══════ */
+.stats-row{
+  display:grid;grid-template-columns:repeat(4,1fr);
+  max-width:1200px;margin:0 auto;gap:0;
+  border:1px solid var(--border);border-radius:var(--r16);overflow:hidden;
+}
+.stat-box{
+  padding:2rem 1.5rem;text-align:center;position:relative;
+  background:rgba(9,9,22,0.6);backdrop-filter:blur(10px);
+  border-right:1px solid var(--border);
+  transition:background .3s;
+}
+.stat-box:last-child{border-right:none}
+.stat-box:hover{background:rgba(30,144,255,0.05)}
+.sn{
+  font-size:2.4rem;font-weight:800;letter-spacing:-.05em;
+  background:linear-gradient(135deg,var(--blue2),var(--cyan));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+}
+.sl{font-size:.72rem;color:var(--muted);margin-top:.25rem;font-family:var(--mono);letter-spacing:.05em}
+
+/* ══════ SECTION COMMONS ══════ */
+section{padding:7rem 2rem;position:relative;z-index:2}
+.container{max-width:1200px;margin:0 auto}
+.s-tag{display:inline-block;font-family:var(--mono);font-size:.68rem;
+  letter-spacing:.2em;text-transform:uppercase;color:var(--cyan);margin-bottom:.8rem}
+.s-title{font-size:clamp(1.7rem,3.8vw,2.8rem);font-weight:800;
+  letter-spacing:-.04em;line-height:1.1;margin-bottom:.8rem}
+.s-sub{color:var(--muted);font-size:.95rem;line-height:1.75;font-weight:300}
+.divider{height:1px;background:linear-gradient(to right,transparent,var(--border),transparent);
+  max-width:1200px;margin:0 auto}
+
+/* ══════ PRODUCTS ══════ */
+#products{background:radial-gradient(ellipse 80% 50% at 50% 0%,rgba(30,144,255,0.04),transparent)}
+.prod-header{display:flex;align-items:flex-end;justify-content:space-between;
+  flex-wrap:wrap;gap:1rem;margin-bottom:3rem}
+.prod-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem}
+.prod-featured{
+  grid-column:1/-1;
+  padding:2.5rem;border-radius:var(--r20);
+  background:linear-gradient(135deg,rgba(30,144,255,0.07),rgba(6,255,216,0.04),rgba(124,58,237,0.05));
+  border:1px solid rgba(30,144,255,0.2);
+  display:flex;align-items:center;justify-content:space-between;
+  gap:2.5rem;flex-wrap:wrap;position:relative;overflow:hidden;
+  transition:transform .3s,box-shadow .3s;
+}
+.prod-featured::before{
+  content:'';position:absolute;top:-100px;right:-100px;
+  width:500px;height:500px;
+  background:radial-gradient(circle,rgba(6,255,216,0.06),transparent 65%);
+  pointer-events:none;
+}
+.prod-featured:hover{transform:translateY(-5px);box-shadow:0 24px 80px rgba(30,144,255,0.18)}
+.live-pill{
+  display:inline-flex;align-items:center;gap:.4rem;
+  padding:.22rem .75rem;border-radius:var(--r-full);
+  background:rgba(0,232,120,0.1);border:1px solid rgba(0,232,120,0.25);
+  font-size:.65rem;font-family:var(--mono);color:var(--green);
+  letter-spacing:.08em;margin-bottom:.9rem;
+}
+.pname{font-size:2.2rem;font-weight:800;letter-spacing:-.05em;margin-bottom:.5rem;
+  background:linear-gradient(135deg,#fff,var(--cyan));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.pdesc{font-size:.92rem;color:var(--muted);line-height:1.65;max-width:480px;margin-bottom:1.4rem}
+.ptags{display:flex;gap:.6rem;flex-wrap:wrap;margin-bottom:1.6rem}
+.ptag{padding:.22rem .7rem;border-radius:6px;
+  background:rgba(255,255,255,0.04);border:1px solid var(--border);
+  font-size:.68rem;font-family:var(--mono);color:var(--muted)}
+.prod-vis{
+  flex-shrink:0;width:240px;height:180px;border-radius:var(--r16);
+  background:linear-gradient(135deg,rgba(30,144,255,0.1),rgba(6,255,216,0.06));
+  border:1px solid rgba(30,144,255,0.18);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:.6rem;position:relative;overflow:hidden;
+}
+.prod-vis::after{content:'';position:absolute;inset:0;
+  background:linear-gradient(135deg,transparent,rgba(6,255,216,0.04))}
+.prod-vis-icon{font-size:3rem}
+.prod-vis-url{font-family:var(--mono);font-size:.65rem;color:var(--cyan);opacity:.7}
+.prod-card{
+  padding:1.8rem;border-radius:var(--r16);
+  background:rgba(9,9,22,0.7);border:1px solid var(--border);
+  backdrop-filter:blur(12px);position:relative;overflow:hidden;
+  transition:transform .3s,box-shadow .3s,border-color .3s;
+}
+.prod-card::before{content:'';position:absolute;inset:0;
+  background:linear-gradient(135deg,transparent,rgba(255,255,255,0.012));pointer-events:none}
+.prod-card:hover{transform:translateY(-7px);
+  box-shadow:0 20px 60px rgba(0,0,0,0.4);border-color:var(--border2)}
+.cs-pill{position:absolute;top:1.1rem;right:1.1rem;
+  font-size:.6rem;font-family:var(--mono);color:var(--dimmed);
+  padding:.15rem .55rem;background:rgba(255,255,255,0.04);border-radius:4px;letter-spacing:.06em}
+.card-ico{width:42px;height:42px;border-radius:var(--r12);display:flex;
+  align-items:center;justify-content:center;font-size:1.2rem;margin-bottom:.9rem}
+.card-name{font-size:1.05rem;font-weight:700;margin-bottom:.35rem}
+.card-desc{font-size:.82rem;color:var(--muted);line-height:1.6}
+
+/* ══════ ABOUT / FOUNDER ══════ */
+#about{background:var(--bg)}
+.about-layout{display:grid;grid-template-columns:1fr 1fr;gap:5rem;align-items:center}
+.founder-card{
+  background:rgba(9,9,22,0.8);border:1px solid var(--border2);
+  border-radius:var(--r20);padding:2.5rem;position:relative;overflow:hidden;
+  backdrop-filter:blur(20px);
+}
+.founder-card::before{
+  content:'';position:absolute;top:-60px;right:-60px;
+  width:300px;height:300px;
+  background:radial-gradient(circle,rgba(124,58,237,0.1),transparent 65%);
+}
+.founder-card::after{
+  content:'';position:absolute;bottom:-40px;left:-40px;
+  width:200px;height:200px;
+  background:radial-gradient(circle,rgba(30,144,255,0.08),transparent 65%);
+}
+.f-avatar{
+  width:72px;height:72px;border-radius:50%;
+  background:linear-gradient(135deg,var(--blue),var(--purple),var(--cyan));
+  display:flex;align-items:center;justify-content:center;
+  font-size:1.8rem;margin-bottom:1.2rem;
+  box-shadow:0 0 30px rgba(30,144,255,0.35);
+  position:relative;z-index:1;
+}
+.f-name{font-size:1.5rem;font-weight:800;letter-spacing:-.04em;position:relative;z-index:1}
+.f-role{font-size:.78rem;font-family:var(--mono);color:var(--cyan);
+  letter-spacing:.05em;margin-bottom:1rem;position:relative;z-index:1}
+.f-bio{font-size:.88rem;color:var(--muted);line-height:1.7;
+  margin-bottom:1.5rem;position:relative;z-index:1}
+.f-skills{display:flex;flex-wrap:wrap;gap:.5rem;margin-bottom:1.5rem;position:relative;z-index:1}
+.fskill{
+  padding:.25rem .7rem;border-radius:6px;font-size:.68rem;font-family:var(--mono);
+  background:rgba(255,255,255,0.04);border:1px solid var(--border);color:var(--muted);
+  transition:background .2s,color .2s,border-color .2s;
+}
+.fskill:hover{background:rgba(30,144,255,0.08);color:var(--blue2);border-color:rgba(30,144,255,0.25)}
+.f-links{display:flex;gap:.7rem;position:relative;z-index:1}
+.f-link{
+  display:flex;align-items:center;gap:.4rem;
+  padding:.45rem .9rem;border-radius:var(--r8);
+  background:rgba(255,255,255,0.04);border:1px solid var(--border);
+  font-size:.75rem;font-family:var(--mono);color:var(--muted);text-decoration:none;
+  transition:background .2s,color .2s,border-color .2s;
+}
+.f-link:hover{background:rgba(30,144,255,0.1);color:var(--cyan);border-color:rgba(30,144,255,0.3)}
+
+/* orbit visual */
+.orbit-wrap{position:relative;height:420px;display:flex;align-items:center;justify-content:center}
+.orbit{position:absolute;border-radius:50%;border:1px solid;animation:orb linear infinite}
+.orb1{width:180px;height:180px;border-color:rgba(30,144,255,0.25);animation-duration:18s}
+.orb2{width:280px;height:280px;border-color:rgba(124,58,237,0.18);animation-duration:28s;animation-direction:reverse}
+.orb3{width:380px;height:380px;border-color:rgba(6,255,216,0.1);animation-duration:40s}
+.orb4{width:420px;height:420px;border-color:rgba(30,144,255,0.06);animation-duration:55s;animation-direction:reverse}
+@keyframes orb{from{transform:rotate(0)}to{transform:rotate(360deg)}}
+.orb-node{
+  position:absolute;width:10px;height:10px;border-radius:50%;
+  transform:translateX(-50%) translateY(-50%);
+}
+.orb-center{
+  width:70px;height:70px;border-radius:var(--r16);z-index:2;
+  background:linear-gradient(135deg,var(--blue),var(--purple));
+  display:flex;align-items:center;justify-content:center;font-size:1.8rem;
+  box-shadow:0 0 50px rgba(30,144,255,0.45);
+}
+
+.values-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-top:2rem}
+.val-card{padding:1.2rem;border-radius:var(--r12);
+  background:rgba(9,9,22,0.7);border:1px solid var(--border);
+  transition:border-color .2s,background .2s;
+}
+.val-card:hover{background:rgba(30,144,255,0.04);border-color:rgba(30,144,255,0.2)}
+.val-icon{font-size:1.3rem;margin-bottom:.4rem}
+.val-name{font-size:.82rem;font-weight:700;margin-bottom:.25rem}
+.val-desc{font-size:.75rem;color:var(--muted);line-height:1.5}
+
+/* ══════ THREAT MAP ══════ */
+#threat{background:var(--bg);padding:6rem 2rem}
+.threat-container{
+  background:rgba(9,9,22,0.8);border:1px solid var(--border);
+  border-radius:var(--r20);overflow:hidden;
+}
+.threat-header{
+  padding:1.2rem 1.8rem;border-bottom:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem;
+}
+.threat-title-row{display:flex;align-items:center;gap:.8rem}
+.threat-title-row h3{font-size:.9rem;font-weight:600}
+.threat-status{display:flex;align-items:center;gap:.5rem;
+  font-size:.68rem;font-family:var(--mono);color:var(--green)}
+.threat-meta{display:flex;gap:1.5rem;flex-wrap:wrap}
+.tmeta{font-family:var(--mono);font-size:.7rem;color:var(--muted)}
+.tmeta span{color:var(--cyan);font-weight:500}
+.threat-body{display:grid;grid-template-columns:1fr 320px;min-height:360px}
+#threat-canvas-wrap{position:relative;background:#04040c;overflow:hidden}
+#threat-canvas{width:100%;height:360px}
+.threat-sidebar{border-left:1px solid var(--border);display:flex;flex-direction:column}
+.ts-header{padding:.8rem 1.2rem;border-bottom:1px solid var(--border);
+  font-size:.72rem;font-family:var(--mono);color:var(--muted);letter-spacing:.1em}
+.ts-feed{flex:1;overflow-y:auto;padding:.6rem}
+.threat-evt{
+  display:flex;align-items:flex-start;gap:.6rem;
+  padding:.5rem .4rem;border-bottom:1px solid rgba(100,100,200,0.07);
+  animation:evtIn .4s ease forwards;opacity:0;
+}
+@keyframes evtIn{from{opacity:0;transform:translateX(10px)}to{opacity:1;transform:translateX(0)}}
+.te-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;margin-top:3px}
+.te-info{flex:1}
+.te-type{font-size:.68rem;font-family:var(--mono);margin-bottom:.15rem}
+.te-loc{font-size:.62rem;color:var(--muted);font-family:var(--mono)}
+.te-time{font-size:.6rem;color:var(--dimmed);font-family:var(--mono);flex-shrink:0}
+
+/* ══════ TECH STACK ══════ */
+#tech{background:linear-gradient(to bottom,var(--bg),var(--surface),var(--bg))}
+.tech-categories{display:flex;flex-direction:column;gap:2rem;margin-top:3rem}
+.tech-cat-label{font-size:.68rem;font-family:var(--mono);color:var(--muted);
+  letter-spacing:.15em;text-transform:uppercase;margin-bottom:.8rem}
+.tech-row{display:flex;flex-wrap:wrap;gap:.75rem}
+.tech-badge{
+  display:flex;align-items:center;gap:.55rem;
+  padding:.55rem 1.1rem;border-radius:var(--r8);
+  background:rgba(9,9,22,0.8);border:1px solid var(--border);
+  font-size:.82rem;transition:transform .2s,box-shadow .2s,border-color .2s;
+  cursor:default;backdrop-filter:blur(8px);
+}
+.tech-badge:hover{transform:translateY(-4px);
+  box-shadow:0 12px 32px rgba(0,0,0,0.35);border-color:var(--border2)}
+.ti{font-size:1rem}
+.tn{color:var(--text);font-weight:500}
+.td{font-size:.65rem;color:var(--muted);font-family:var(--mono);margin-left:.1rem}
+
+/* ══════ MATRIX SECTION ══════ */
+#matrix-sec{
+  padding:0;position:relative;height:200px;overflow:hidden;
+  display:flex;align-items:center;justify-content:center;
+}
+#matrix-c{position:absolute;inset:0;opacity:.3}
+.matrix-overlay{
+  position:relative;z-index:2;text-align:center;
+  padding:2rem;
+}
+.matrix-quote{
+  font-size:clamp(1rem,2.5vw,1.6rem);font-weight:700;
+  letter-spacing:-.02em;
+  background:linear-gradient(90deg,var(--cyan),var(--blue),var(--violet));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+}
+.matrix-attr{font-size:.72rem;font-family:var(--mono);color:var(--muted);margin-top:.5rem}
+
+/* ══════ BLOG ══════ */
+#blog{background:var(--bg)}
+.blog-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem;margin-top:3rem}
+.blog-card{
+  border-radius:var(--r16);background:rgba(9,9,22,0.7);
+  border:1px solid var(--border);overflow:hidden;
+  transition:transform .3s,box-shadow .3s,border-color .3s;
+  backdrop-filter:blur(10px);
+}
+.blog-card:hover{transform:translateY(-7px);
+  box-shadow:0 20px 60px rgba(0,0,0,0.4);border-color:var(--border2)}
+.blog-thumb{height:150px;display:flex;align-items:center;justify-content:center;
+  font-size:3rem;position:relative;overflow:hidden}
+.blog-thumb::after{content:'';position:absolute;inset:0;
+  background:linear-gradient(to bottom,transparent 40%,rgba(9,9,22,0.6))}
+.blog-body{padding:1.4rem}
+.blog-tag{font-size:.65rem;font-family:var(--mono);color:var(--cyan);
+  letter-spacing:.1em;text-transform:uppercase;margin-bottom:.5rem}
+.blog-title{font-size:.92rem;font-weight:700;line-height:1.4;margin-bottom:.5rem}
+.blog-sum{font-size:.8rem;color:var(--muted);line-height:1.6;margin-bottom:1rem}
+.blog-meta{display:flex;gap:.5rem;align-items:center;
+  font-size:.68rem;color:var(--dimmed);font-family:var(--mono)}
+.blog-meta a{color:var(--muted);text-decoration:none;transition:color .2s}
+.blog-meta a:hover{color:var(--cyan)}
+
+/* ══════ TESTIMONIALS ══════ */
+#testi{background:linear-gradient(to bottom,var(--bg),var(--surface),var(--bg))}
+.testi-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem;margin-top:3rem}
+.testi-card{
+  padding:1.8rem;border-radius:var(--r16);
+  background:rgba(9,9,22,0.7);border:1px solid var(--border);
+  transition:transform .3s,box-shadow .3s;backdrop-filter:blur(10px);
+}
+.testi-card:hover{transform:translateY(-5px);box-shadow:0 16px 50px rgba(0,0,0,0.35)}
+.stars{color:var(--amber);font-size:.85rem;letter-spacing:.1em;margin-bottom:1rem}
+.testi-q{font-size:.88rem;color:var(--muted);line-height:1.75;margin-bottom:1.4rem;font-style:italic}
+.testi-a{display:flex;align-items:center;gap:.75rem}
+.t-av{width:36px;height:36px;border-radius:50%;display:flex;
+  align-items:center;justify-content:center;font-size:.78rem;font-weight:700;flex-shrink:0}
+.t-name{font-size:.82rem;font-weight:600}
+.t-role{font-size:.68rem;color:var(--muted);font-family:var(--mono)}
+
+/* ══════ CONTACT ══════ */
+#contact{background:var(--bg)}
+.contact-layout{display:grid;grid-template-columns:1fr 1.3fr;gap:5rem;margin-top:3rem}
+.c-info p{color:var(--muted);font-size:.9rem;line-height:1.7;margin-bottom:2rem}
+.c-detail{display:flex;align-items:center;gap:.8rem;margin-bottom:.9rem}
+.c-detail a{color:var(--muted);text-decoration:none;font-size:.88rem;transition:color .2s}
+.c-detail a:hover{color:var(--cyan)}
+.c-ico{width:36px;height:36px;border-radius:9px;flex-shrink:0;
+  background:rgba(30,144,255,0.08);border:1px solid rgba(30,144,255,0.18);
+  display:flex;align-items:center;justify-content:center;font-size:.9rem}
+.socials{display:flex;gap:.7rem;margin-top:2rem}
+.s-btn{
+  width:40px;height:40px;border-radius:var(--r8);
+  background:rgba(255,255,255,0.04);border:1px solid var(--border);
+  display:flex;align-items:center;justify-content:center;
+  text-decoration:none;color:var(--muted);
+  transition:transform .2s,background .2s,border-color .2s,color .2s;
+}
+.s-btn:hover{transform:translateY(-3px);background:rgba(30,144,255,0.1);
+  color:var(--cyan);border-color:rgba(30,144,255,0.3)}
+.form-wrap{
+  background:rgba(9,9,22,0.7);border:1px solid var(--border);
+  border-radius:var(--r20);padding:2rem;backdrop-filter:blur(15px);
+}
+.f-grp{margin-bottom:1.1rem}
+.f-lbl{display:block;font-family:var(--mono);font-size:.68rem;color:var(--muted);
+  letter-spacing:.1em;text-transform:uppercase;margin-bottom:.45rem}
+.f-inp,.f-txt{
+  width:100%;padding:.8rem 1rem;
+  background:rgba(4,4,12,0.8);border:1px solid var(--border);border-radius:var(--r8);
+  color:var(--text);font-family:var(--font);font-size:.88rem;outline:none;
+  transition:border-color .2s,box-shadow .2s;cursor:none;
+}
+.f-inp:focus,.f-txt:focus{border-color:rgba(30,144,255,0.45);
+  box-shadow:0 0 20px rgba(30,144,255,0.08)}
+.f-txt{resize:vertical;min-height:110px}
+.f-status{margin-top:.75rem;font-size:.78rem;font-family:var(--mono);display:none}
+.f-status.ok{color:var(--cyan);display:block}
+.f-status.err{color:var(--red);display:block}
+
+/* ══════ CTA BANNER ══════ */
+.cta-banner{
+  margin:0 auto;max-width:1200px;
+  padding:4rem 3rem;border-radius:var(--r20);
+  background:linear-gradient(135deg,rgba(30,144,255,0.09),rgba(124,58,237,0.09),rgba(6,255,216,0.06));
+  border:1px solid rgba(30,144,255,0.18);text-align:center;
+  position:relative;overflow:hidden;
+}
+.cta-banner::before{content:'';position:absolute;top:-50%;left:-20%;
+  width:60%;height:200%;
+  background:radial-gradient(ellipse,rgba(30,144,255,0.06),transparent 65%);
+  pointer-events:none}
+.cta-banner h2{font-size:clamp(1.5rem,3vw,2.5rem);font-weight:800;
+  letter-spacing:-.04em;margin-bottom:.8rem}
+.cta-banner p{color:var(--muted);margin-bottom:2rem;font-size:.95rem}
+.cta-btns{display:flex;gap:1rem;justify-content:center;flex-wrap:wrap}
+
+/* ══════ FOOTER ══════ */
+footer{background:var(--surface);border-top:1px solid var(--border);padding:3.5rem 2rem 2rem}
+.footer-grid{max-width:1200px;margin:0 auto;
+  display:grid;grid-template-columns:2.5fr 1fr 1fr 1fr;gap:3rem;margin-bottom:3rem}
+.fb-desc{font-size:.82rem;color:var(--muted);line-height:1.7;
+  max-width:240px;margin-top:.8rem;margin-bottom:1.2rem}
+.fc-head{font-size:.68rem;font-family:var(--mono);letter-spacing:.15em;
+  text-transform:uppercase;color:var(--text);margin-bottom:1rem}
+.fc-link{display:block;font-size:.82rem;color:var(--muted);text-decoration:none;
+  margin-bottom:.55rem;transition:color .2s}
+.fc-link:hover{color:var(--cyan)}
+.footer-bottom{max-width:1200px;margin:0 auto;
+  display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem;
+  padding-top:2rem;border-top:1px solid var(--border);
+  font-size:.72rem;color:var(--muted);font-family:var(--mono)}
+.footer-bottom .socials{margin-top:0}
+
+/* ══════ REVEAL ══════ */
+.rv{opacity:0;transform:translateY(28px);transition:opacity .75s ease,transform .75s ease}
+.rv.on{opacity:1;transform:translateY(0)}
+.rv-l{opacity:0;transform:translateX(-28px);transition:opacity .75s ease,transform .75s ease}
+.rv-l.on{opacity:1;transform:translateX(0)}
+.rv-r{opacity:0;transform:translateX(28px);transition:opacity .75s ease,transform .75s ease}
+.rv-r.on{opacity:1;transform:translateX(0)}
+
+/* ══════ RESPONSIVE ══════ */
+@media(max-width:1024px){
+  .footer-grid{grid-template-columns:1fr 1fr;gap:2rem}
+  .threat-body{grid-template-columns:1fr}
+  .threat-sidebar{border-left:none;border-top:1px solid var(--border);max-height:200px}
+}
+@media(max-width:860px){
+  .prod-grid,.about-layout,.contact-layout{grid-template-columns:1fr}
+  .prod-featured{grid-column:auto}
+  .blog-grid,.testi-grid{grid-template-columns:1fr}
+  .stats-row{grid-template-columns:1fr 1fr}
+  .stat-box{border-right:none;border-bottom:1px solid var(--border)}
+  .stat-box:nth-child(2n){border-right:none}
+  nav.desk,.badge-founder{display:none}
+  .ham{display:flex}
+  .orbit-wrap{height:320px}
+  .orb3,.orb4{display:none}
+  .values-grid{grid-template-columns:1fr}
+  .footer-grid{grid-template-columns:1fr}
+  section{padding:5rem 1.5rem}
+  .fc-1,.fc-3{display:none}
+  .fc-2{right:2%}
+  .fc-4{right:2%;bottom:22%}
+}
+@media(max-width:520px){
+  .stats-row{grid-template-columns:1fr 1fr}
+  .hero-ctas{flex-direction:column;align-items:center}
+  .btn-p,.btn-s{width:100%;text-align:center}
+  .trust-strip{gap:1rem}
+  section{padding:4rem 1.2rem}
+}
+</style>
+</head>
+<body>
+
+<div id="cur"></div>
+<div id="cur-r"></div>
+
+<!-- TICKER -->
+<div class="ticker" aria-hidden="true">
+  <div class="ticker-inner" id="tickerInner"></div>
+</div>
+
+<!-- HEADER -->
+<header id="hdr">
+  <a href="#" class="logo" aria-label="SyncWorld Together">
+    <div class="logo-mark">SW</div>
+    <div class="logo-text">Sync<span>World</span></div>
+  </a>
+  <nav class="desk" aria-label="Primary">
+    <a href="#hero">Home</a>
+    <a href="#products">Products</a>
+    <a href="#about">About</a>
+    <a href="#tech">Tech</a>
+    <a href="#blog">Blog</a>
+    <a href="#contact">Contact</a>
+  </nav>
+  <div class="hdr-right">
+    <div class="badge-founder">⚡ Sajal Haldar</div>
+    <a href="https://linkphone.syncworld.tech" target="_blank" rel="noopener" class="btn-launch">Launch LinkPhone</a>
+    <button class="ham" id="ham" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</header>
+
+<!-- MOBILE NAV -->
+<nav class="mob-nav" id="mobNav" aria-label="Mobile navigation">
+  <button class="mob-close" id="mobClose" aria-label="Close">✕</button>
+  <a href="#hero" class="mnl">Home</a>
+  <a href="#products" class="mnl">Products</a>
+  <a href="#about" class="mnl">About</a>
+  <a href="#tech" class="mnl">Tech</a>
+  <a href="#blog" class="mnl">Blog</a>
+  <a href="#contact" class="mnl">Contact</a>
+  <a href="https://linkphone.syncworld.tech" target="_blank" rel="noopener" class="btn-launch">Launch LinkPhone →</a>
+</nav>
+
+<!-- HERO -->
+<section id="hero">
+  <canvas id="c3d"></canvas>
+  <div class="grid-bg" aria-hidden="true"></div>
+
+  <!-- Floating Cards -->
+  <div class="fcards" aria-hidden="true">
+    <div class="fc fc-1">
+      <div class="lbl">ENCRYPTION</div>
+      <div class="val" style="color:var(--green)"><span class="g-dot"></span>AES-256-GCM</div>
+    </div>
+    <div class="fc fc-2">
+      <div class="lbl">CONNECTED DEVICES</div>
+      <div class="val" style="color:var(--cyan)">14,892 active</div>
+    </div>
+    <div class="fc fc-3">
+      <div class="lbl">LATENCY</div>
+      <div class="val" style="color:var(--blue2)">48ms avg</div>
+    </div>
+    <div class="fc fc-4">
+      <div class="lbl">UPTIME SLA</div>
+      <div class="val" style="color:var(--green)"><span class="g-dot"></span>99.99%</div>
+    </div>
+  </div>
+
+  <div class="hero-inner">
+    <div class="hero-chip">Building the Future of Digital Innovation</div>
+    <h1 class="h1">
+      <span class="line1">Innovative Software</span>
+      <span class="line2">for a Connected World</span>
+    </h1>
+    <p class="hero-sub">SyncWorld creates secure, scalable, and beautifully engineered products for communication, cybersecurity, and productivity — built by a security researcher who knows how systems really work.</p>
+    <div class="hero-ctas">
+      <a href="#products" class="btn-p">Explore Products</a>
+      <a href="https://linkphone.syncworld.tech" target="_blank" rel="noopener" class="btn-s">Launch LinkPhone →</a>
+    </div>
+    <div class="trust-strip">
+      <div class="trust-item"><span>🔐</span><span>Zero-Trust Architecture</span></div>
+      <div class="trust-item"><span>⚡</span><span>Sub-50ms Latency</span></div>
+      <div class="trust-item"><span>🌐</span><span>40+ Countries</span></div>
+      <div class="trust-item"><span>🛡️</span><span>OWASP Compliant</span></div>
+    </div>
+  </div>
+  <div class="scroll-hint" aria-hidden="true">
+    <div class="scroll-line"></div>
+    <span>SCROLL</span>
+  </div>
+</section>
+
+<!-- STATS -->
+<div style="background:linear-gradient(to right,rgba(30,144,255,0.04),rgba(6,255,216,0.04));padding:3rem 2rem;position:relative;z-index:2">
+  <div class="stats-row">
+    <div class="stat-box rv">
+      <div class="sn" id="s1">0</div>
+      <div class="sl">Active Users</div>
+    </div>
+    <div class="stat-box rv">
+      <div class="sn" id="s2">0</div>
+      <div class="sl">Uptime SLA</div>
+    </div>
+    <div class="stat-box rv">
+      <div class="sn" id="s3">0</div>
+      <div class="sl">Countries Reached</div>
+    </div>
+    <div class="stat-box rv">
+      <div class="sn" id="s4">0</div>
+      <div class="sl">Products Shipped</div>
+    </div>
+  </div>
+</div>
+
+<!-- PRODUCTS -->
+<section id="products">
+  <div class="container">
+    <div class="prod-header">
+      <div class="rv">
+        <div class="s-tag">Our Products</div>
+        <h2 class="s-title">Built for the<br/>Modern Digital Era</h2>
+      </div>
+      <p class="s-sub rv" style="max-width:340px">From secure comms to AI-powered workflows — engineered at the intersection of security and elegance.</p>
+    </div>
+    <div class="prod-grid">
+      <!-- LinkPhone -->
+      <div class="prod-featured rv">
+        <div>
+          <div class="live-pill"><span class="g-dot"></span>LIVE · linkphone.syncworld.tech</div>
+          <div class="pname">LinkPhone</div>
+          <p class="pdesc">The next-generation secure device communication and remote collaboration platform. End-to-end encrypted calls, real-time file transfer, and cross-platform collaboration — engineered with VAPT-tested security.</p>
+          <div class="ptags">
+            <span class="ptag">E2E Encrypted</span>
+            <span class="ptag">WebRTC</span>
+            <span class="ptag">LiveKit SFU</span>
+            <span class="ptag">AES-256-GCM</span>
+            <span class="ptag">Zero-Trust</span>
+            <span class="ptag">Cross-Platform</span>
+          </div>
+          <a href="https://linkphone.syncworld.tech" target="_blank" rel="noopener" class="btn-p" style="display:inline-block;padding:.75rem 1.8rem">Open App →</a>
+        </div>
+        <div class="prod-vis" aria-hidden="true">
+          <div class="prod-vis-icon">📱</div>
+          <div class="prod-vis-url">linkphone.syncworld.tech</div>
+        </div>
+      </div>
+
+      <!-- Cards -->
+      <div class="prod-card rv">
+        <div class="cs-pill">COMING SOON</div>
+        <div class="card-ico" style="background:rgba(124,58,237,0.15);border:1px solid rgba(124,58,237,0.25)">🔒</div>
+        <div class="card-name">SyncVault</div>
+        <p class="card-desc">Zero-knowledge encrypted cloud storage. Military-grade key management — your data is mathematically inaccessible to anyone but you.</p>
+      </div>
+
+      <div class="prod-card rv">
+        <div class="cs-pill">COMING SOON</div>
+        <div class="card-ico" style="background:rgba(255,45,85,0.12);border:1px solid rgba(255,45,85,0.22)">🛡️</div>
+        <div class="card-name">SyncShield</div>
+        <p class="card-desc">Real-time threat intelligence, VAPT automation, and AI-powered anomaly detection for enterprise security teams.</p>
+      </div>
+
+      <div class="prod-card rv">
+        <div class="cs-pill">COMING SOON</div>
+        <div class="card-ico" style="background:rgba(6,255,216,0.1);border:1px solid rgba(6,255,216,0.2)">🤖</div>
+        <div class="card-name">SyncAI</div>
+        <p class="card-desc">Privacy-first AI assistant and automation engine trained on your workflow — fully on-device, never phoning home.</p>
+      </div>
+
+      <div class="prod-card rv">
+        <div class="cs-pill">COMING SOON</div>
+        <div class="card-ico" style="background:rgba(30,144,255,0.12);border:1px solid rgba(30,144,255,0.22)">⚡</div>
+        <div class="card-name">SyncTransfer</div>
+        <p class="card-desc">P2P encrypted file transfer with no size limits. SRTP-secured channels, Raspberry Pi-compatible edge nodes.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ABOUT / FOUNDER -->
+<section id="about">
+  <div class="container">
+    <div class="about-layout">
+      <!-- Founder Card -->
+      <div class="rv-l">
+        <div class="s-tag">Founder & Vision</div>
+        <h2 class="s-title">The Mind<br/>Behind SyncWorld</h2>
+        <p class="s-sub" style="margin-bottom:1.5rem">SyncWorld Together was born from the intersection of deep security research and the belief that the world deserves better-engineered, more honest software.</p>
+        <div class="founder-card">
+          <div class="f-avatar">🛡️</div>
+          <div class="f-name">Sajal Haldar</div>
+          <div class="f-role">Ethical Hacker · Security Researcher · Software Engineer</div>
+          <div class="f-bio">"Studying how data moves, how systems fail, and how models learn." — Based in Kolkata, India. B.Tech CS (Cyber Security) · MAKAUT · Building tools that treat security as a first principle, not an afterthought.</div>
+          <div class="f-skills">
+            <span class="fskill">Python</span>
+            <span class="fskill">Go</span>
+            <span class="fskill">C++</span>
+            <span class="fskill">JavaScript</span>
+            <span class="fskill">Bash</span>
+            <span class="fskill">Burp Suite</span>
+            <span class="fskill">Metasploit</span>
+            <span class="fskill">VAPT</span>
+            <span class="fskill">OSINT</span>
+            <span class="fskill">Nmap</span>
+            <span class="fskill">Wireshark</span>
+            <span class="fskill">Kali Linux</span>
+            <span class="fskill">PyTorch</span>
+            <span class="fskill">OpenCV</span>
+          </div>
+          <div class="f-links">
+            <a href="https://github.com/Sudo0xSajal" target="_blank" rel="noopener" class="f-link">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"/></svg>
+              Sudo0xSajal
+            </a>
+            <a href="https://linkedin.com/in/sajalhaldar16" target="_blank" rel="noopener" class="f-link">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+              LinkedIn
+            </a>
+            <a href="mailto:sajalhaldar2004@gmail.com" class="f-link">
+              ✉ Email
+            </a>
+          </div>
+        </div>
+        <div class="values-grid">
+          <div class="val-card"><div class="val-icon">🔐</div><div class="val-name">Security-First</div><div class="val-desc">VAPT-tested, zero-trust, every release.</div></div>
+          <div class="val-card"><div class="val-icon">⚡</div><div class="val-name">Performance</div><div class="val-desc">Sub-50ms, 99.99% uptime, always.</div></div>
+          <div class="val-card"><div class="val-icon">🌐</div><div class="val-name">Cross-Platform</div><div class="val-desc">Web, mobile, Raspberry Pi, everywhere.</div></div>
+          <div class="val-card"><div class="val-icon">🧠</div><div class="val-name">AI + Security</div><div class="val-desc">CV & ML meets threat intelligence.</div></div>
+        </div>
+      </div>
+
+      <!-- Orbit Visual -->
+      <div class="rv-r">
+        <div class="orbit-wrap" aria-hidden="true">
+          <div class="orbit orb1" id="o1"></div>
+          <div class="orbit orb2" id="o2"></div>
+          <div class="orbit orb3"></div>
+          <div class="orbit orb4"></div>
+          <div class="orb-center">🔐</div>
+          <!-- Dynamic orbit nodes added via JS -->
+        </div>
+        <!-- Terminal -->
+        <div style="background:rgba(4,4,12,0.92);border:1px solid rgba(30,144,255,0.18);border-radius:var(--r16);overflow:hidden;font-family:var(--mono);font-size:.78rem;margin-top:1.5rem">
+          <div style="background:rgba(9,9,22,0.9);padding:.6rem 1rem;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:.5rem">
+            <div style="width:9px;height:9px;border-radius:50%;background:#ff5f57"></div>
+            <div style="width:9px;height:9px;border-radius:50%;background:#febc2e"></div>
+            <div style="width:9px;height:9px;border-radius:50%;background:#28c840"></div>
+            <span style="font-size:.65rem;color:var(--muted);margin-left:.4rem">sudo0xsajal — bash — syncworld@sec</span>
+          </div>
+          <div id="terminal-body" style="padding:1.1rem;line-height:1.9;color:var(--muted)"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- LIVE THREAT MAP -->
+<section id="threat">
+  <div class="container">
+    <div class="rv" style="margin-bottom:2rem">
+      <div class="s-tag">Live Intelligence</div>
+      <h2 class="s-title">Global Threat<br/>Intelligence Feed</h2>
+      <p class="s-sub">Real-time simulated threat monitoring — the kind of situational awareness built into every SyncWorld product.</p>
+    </div>
+    <div class="threat-container rv">
+      <div class="threat-header">
+        <div class="threat-title-row">
+          <div style="width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 10px var(--green)"></div>
+          <h3>SyncShield Threat Monitor</h3>
+        </div>
+        <div class="threat-status">
+          <div style="width:6px;height:6px;border-radius:50%;background:var(--green);animation:pulse2 2s infinite"></div>
+          MONITORING ACTIVE
+        </div>
+        <div class="threat-meta">
+          <div class="tmeta">Threats Blocked: <span id="blocked-count">0</span></div>
+          <div class="tmeta">Active IPs: <span id="ip-count">0</span></div>
+          <div class="tmeta">Risk Level: <span style="color:var(--green)">LOW</span></div>
+        </div>
+      </div>
+      <div class="threat-body">
+        <div id="threat-canvas-wrap"><canvas id="threat-canvas"></canvas></div>
+        <div class="threat-sidebar">
+          <div class="ts-header">LIVE EVENT LOG</div>
+          <div class="ts-feed" id="ts-feed"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- TECH STACK -->
+<section id="tech">
+  <div class="container">
+    <div class="rv" style="margin-bottom:0">
+      <div class="s-tag">Technology Stack</div>
+      <h2 class="s-title">Engineered with the<br/>Best-in-Class Tools</h2>
+      <p class="s-sub">Every tool chosen with intention — because security and performance don't compromise.</p>
+    </div>
+    <div class="tech-categories rv">
+      <div>
+        <div class="tech-cat-label">// Security & Networking</div>
+        <div class="tech-row">
+          <div class="tech-badge"><span class="ti">🛡️</span><span class="tn">OWASP</span><span class="td">Standard</span></div>
+          <div class="tech-badge"><span class="ti">🔍</span><span class="tn">Burp Suite</span><span class="td">VAPT</span></div>
+          <div class="tech-badge"><span class="ti">📡</span><span class="tn">Wireshark</span><span class="td">Analysis</span></div>
+          <div class="tech-badge"><span class="ti">🗺️</span><span class="tn">Nmap</span><span class="td">Recon</span></div>
+          <div class="tech-badge"><span class="ti">💀</span><span class="tn">Metasploit</span><span class="td">Exploit</span></div>
+          <div class="tech-badge"><span class="ti">🔐</span><span class="tn">OpenSSL</span><span class="td">Crypto</span></div>
+          <div class="tech-badge"><span class="ti">☁️</span><span class="tn">Cloudflare</span><span class="td">Edge/WAF</span></div>
+        </div>
+      </div>
+      <div>
+        <div class="tech-cat-label">// Core Engineering</div>
+        <div class="tech-row">
+          <div class="tech-badge"><span class="ti">🐍</span><span class="tn">Python</span><span class="td">Scripts/ML</span></div>
+          <div class="tech-badge"><span class="ti">🔵</span><span class="tn">Go</span><span class="td">Backend</span></div>
+          <div class="tech-badge"><span class="ti">⚙️</span><span class="tn">C++</span><span class="td">Systems</span></div>
+          <div class="tech-badge"><span class="ti">▲</span><span class="tn">Next.js</span><span class="td">Frontend</span></div>
+          <div class="tech-badge"><span class="ti">𝕋</span><span class="tn">TypeScript</span><span class="td">Language</span></div>
+          <div class="tech-badge"><span class="ti">📡</span><span class="tn">WebRTC</span><span class="td">Real-time</span></div>
+          <div class="tech-badge"><span class="ti">🎙️</span><span class="tn">LiveKit</span><span class="td">SFU</span></div>
+        </div>
+      </div>
+      <div>
+        <div class="tech-cat-label">// Infrastructure & AI</div>
+        <div class="tech-row">
+          <div class="tech-badge"><span class="ti">🐘</span><span class="tn">PostgreSQL</span><span class="td">Database</span></div>
+          <div class="tech-badge"><span class="ti">⚡</span><span class="tn">Redis</span><span class="td">Cache</span></div>
+          <div class="tech-badge"><span class="ti">🐳</span><span class="tn">Docker</span><span class="td">Containers</span></div>
+          <div class="tech-badge"><span class="ti">🥧</span><span class="tn">Raspberry Pi</span><span class="td">Edge</span></div>
+          <div class="tech-badge"><span class="ti">🔥</span><span class="tn">PyTorch</span><span class="td">ML</span></div>
+          <div class="tech-badge"><span class="ti">👁️</span><span class="tn">OpenCV</span><span class="td">Vision</span></div>
+          <div class="tech-badge"><span class="ti">🚀</span><span class="tn">Vercel</span><span class="td">Deploy</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- MATRIX SECTION -->
+<div id="matrix-sec" aria-hidden="true">
+  <canvas id="matrix-c"></canvas>
+  <div class="matrix-overlay">
+    <div class="matrix-quote">"Systems are never secure — only less vulnerable."</div>
+    <div class="matrix-attr">Sajal Haldar · Founder, SyncWorld Together</div>
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<!-- BLOG -->
+<section id="blog">
+  <div class="container">
+    <div style="display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:1rem;margin-bottom:3rem">
+      <div class="rv">
+        <div class="s-tag">From the Lab</div>
+        <h2 class="s-title">Research & Insights</h2>
+      </div>
+      <a href="#blog" class="btn-s rv" style="padding:.5rem 1.2rem;font-size:.8rem">All Articles →</a>
+    </div>
+    <div class="blog-grid">
+      <div class="blog-card rv">
+        <div class="blog-thumb" style="background:linear-gradient(135deg,rgba(30,144,255,0.15),rgba(6,255,216,0.08))">📱</div>
+        <div class="blog-body">
+          <div class="blog-tag">Security · 5 min</div>
+          <div class="blog-title">How LinkPhone Enables Secure Device Communication</div>
+          <p class="blog-sum">A deep dive into the E2E encryption stack powering LinkPhone — custom key exchange, AES-256-GCM, and VAPT hardening.</p>
+          <div class="blog-meta"><span>Jan 2026</span><span>·</span><a href="https://github.com/Sudo0xSajal" target="_blank" rel="noopener">Sajal Haldar</a></div>
+        </div>
+      </div>
+      <div class="blog-card rv">
+        <div class="blog-thumb" style="background:linear-gradient(135deg,rgba(124,58,237,0.15),rgba(30,144,255,0.08))">📡</div>
+        <div class="blog-body">
+          <div class="blog-tag">Engineering · 8 min</div>
+          <div class="blog-title">Designing Real-Time Apps with WebRTC & LiveKit</div>
+          <p class="blog-sum">How we architected sub-48ms video channels using WebRTC, TURN servers, and LiveKit's SFU — lessons from the field.</p>
+          <div class="blog-meta"><span>March 2026</span><span>·</span><a href="https://github.com/Sudo0xSajal" target="_blank" rel="noopener">Sajal Haldar</a></div>
+        </div>
+      </div>
+      <div class="blog-card rv">
+        <div class="blog-thumb" style="background:linear-gradient(135deg,rgba(6,255,216,0.1),rgba(124,58,237,0.08))">🧠</div>
+        <div class="blog-body">
+          <div class="blog-tag">Research · 6 min</div>
+          <div class="blog-title">OSINT Techniques for Modern Threat Intelligence</div>
+          <p class="blog-sum">Practical OSINT workflows using Maltego, Recon-ng, and custom Python scripts — from a researcher's perspective.</p>
+          <div class="blog-meta"><span>Jan 2026</span><span>·</span><a href="https://github.com/Sudo0xSajal" target="_blank" rel="noopener">Sajal Haldar</a></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- TESTIMONIALS -->
+<section id="testi">
+  <div class="container">
+    <div class="rv" style="text-align:center;margin-bottom:3rem">
+      <div class="s-tag">Testimonials</div>
+      <h2 class="s-title">Trusted by Security Pros<br/>& Digital Builders</h2>
+    </div>
+    <div class="testi-grid">
+      <div class="testi-card rv">
+        <div class="stars">★★★★★</div>
+        <p class="testi-q">"LinkPhone is the only communication tool I trust for sensitive operations. The E2E encryption stack is properly done — not just marketing."</p>
+        <div class="testi-a">
+          <div class="t-av" style="background:linear-gradient(135deg,var(--blue),var(--purple))">AK</div>
+          <div><div class="t-name">Aryan Kapoor</div><div class="t-role">Security Engineer</div></div>
+        </div>
+      </div>
+      <div class="testi-card rv">
+        <div class="stars">★★★★★</div>
+        <p class="testi-q">"As a pen-tester, I've broken through dozens of 'secure' communication apps. SyncWorld's architecture survived everything I threw at it."</p>
+        <div class="testi-a">
+          <div class="t-av" style="background:linear-gradient(135deg,var(--cyan),var(--blue))">SR</div>
+          <div><div class="t-name">Shreya Rao</div><div class="t-role">Security Researcher </div></div>
+        </div>
+      </div>
+      <div class="testi-card rv">
+        <div class="stars">★★★★★</div>
+        <p class="testi-q">"The WebRTC performance is jaw-dropping. Our remote team switched to LinkPhone and calls never drop. The UI is miles ahead of Zoom."</p>
+        <div class="testi-a">
+          <div class="t-av" style="background:linear-gradient(135deg,var(--purple),var(--red))">DM</div>
+          <div><div class="t-name">Dev Malhotra</div><div class="t-role">CTO </div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- CTA BANNER -->
+<section style="padding:4rem 2rem;position:relative;z-index:2">
+  <div class="cta-banner rv">
+    <h2>Ready to Build on Secure Ground?</h2>
+    <p>Join thousands of users who've switched to software that takes security seriously — from day zero.</p>
+    <div class="cta-btns">
+      <a href="https://linkphone.syncworld.tech" target="_blank" rel="noopener" class="btn-p">Launch LinkPhone</a>
+      <a href="#contact" class="btn-s">Get in Touch →</a>
+    </div>
+  </div>
+</section>
+
+<!-- CONTACT -->
+<section id="contact">
+  <div class="container">
+    <div class="contact-layout">
+      <div class="rv-l">
+        <div class="s-tag">Contact</div>
+        <h2 class="s-title">Let's Build<br/>Something Secure</h2>
+        <p class="c-info" style="color:var(--muted);font-size:.9rem;line-height:1.7;margin-top:.8rem;margin-bottom:2rem">Bug bounty reports, partnership ideas, investor inquiries, or just want to geek out about WebRTC? We respond within 24h.</p>
+        <div class="c-detail"><div class="c-ico">📧</div><a href="mailto:sajalhaldar2004@gmail.com">sajalhaldar2004@gmail.com</a></div>
+        <div class="c-detail"><div class="c-ico">🛡️</div><a href="mailto:sajalhaldar2004@gmail.com">sajalhaldar2004@gmail.com</a></div>
+        <div class="c-detail"><div class="c-ico">🌐</div><a href="https://syncworld.tech" target="_blank" rel="noopener">syncworld.tech</a></div>
+        <div class="c-detail"><div class="c-ico">📍</div><span style="font-size:.88rem;color:var(--muted)">Kolkata, West Bengal, India</span></div>
+        <div class="socials" style="margin-top:2rem">
+          <a href="https://github.com/Sudo0xSajal" target="_blank" rel="noopener" class="s-btn" aria-label="GitHub">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"/></svg>
+          </a>
+          <a href="https://linkedin.com/in/sajalhaldar16" target="_blank" rel="noopener" class="s-btn" aria-label="LinkedIn">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+          </a>
+          <!-- <a href="https://x.com/syncworldtech" target="_blank" rel="noopener" class="s-btn" aria-label="X"> -->
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.744l7.737-8.835L1.254 2.25H8.08l4.26 5.632 5.905-5.632zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+          </a>
+        </div>
+      </div>
+      <div class="rv-r">
+        <div class="form-wrap">
+          <div class="f-grp"><label class="f-lbl" for="fn">Name</label><input class="f-inp" id="fn" type="text" placeholder="Your name" autocomplete="name"/></div>
+          <div class="f-grp"><label class="f-lbl" for="fe">Email</label><input class="f-inp" id="fe" type="email" placeholder="you@example.com" autocomplete="email"/></div>
+          <div class="f-grp">
+            <label class="f-lbl" for="fs">Subject</label>
+            <select class="f-inp" id="fs" style="cursor:none">
+              <option value="">Select a topic…</option>
+              <option>Partnership / Collab</option>
+              <option>Security Disclosure</option>
+              <option>Investor Inquiry</option>
+              <option>Product Feedback</option>
+              <option>General Inquiry</option>
+            </select>
+          </div>
+          <div class="f-grp"><label class="f-lbl" for="fm">Message</label><textarea class="f-txt" id="fm" placeholder="Tell us what you're building or thinking…"></textarea></div>
+          <button class="btn-p" id="fBtn" onclick="submitForm()" style="width:100%;text-align:center;border:none">Send Message ↗</button>
+          <div class="f-status" id="fStatus"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-grid">
+    <div>
+      <a href="#" class="logo" style="display:inline-flex;text-decoration:none;color:var(--text)">
+        <div class="logo-mark">SW</div>
+        <div class="logo-text" style="font-size:1rem;font-weight:700;letter-spacing:-.03em">Sync<span style="color:var(--cyan)">World</span></div>
+      </a>
+      <p class="fb-desc">Building secure, scalable, and beautifully engineered products for a connected world — from Kolkata to the globe.</p>
+      <div class="socials">
+        <a href="https://github.com/Sudo0xSajal" target="_blank" rel="noopener" class="s-btn" aria-label="GitHub">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"/></svg>
+        </a>
+        <a href="https://linkedin.com/in/sajalhaldar16" target="_blank" rel="noopener" class="s-btn" aria-label="LinkedIn">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+        </a>
+        <a href="mailto:sajalhaldar2004@gmail.com" class="s-btn" aria-label="Email">✉</a>
+      </div>
+    </div>
+    <div>
+      <div class="fc-head">Company</div>
+      <a class="fc-link" href="#hero">Home</a>
+      <a class="fc-link" href="#about">About</a>
+      <a class="fc-link" href="#blog">Blog</a>
+      <a class="fc-link" href="#contact">Contact</a>
+      <a class="fc-link" href="https://github.com/Sudo0xSajal" target="_blank" rel="noopener">GitHub</a>
+    </div>
+    <div>
+      <div class="fc-head">Products</div>
+      <a class="fc-link" href="https://linkphone.syncworld.tech" target="_blank" rel="noopener">LinkPhone ↗</a>
+      <a class="fc-link" href="#products">SyncVault</a>
+      <a class="fc-link" href="#products">SyncShield</a>
+      <a class="fc-link" href="#products">SyncAI</a>
+      <a class="fc-link" href="#products">SyncTransfer</a>
+    </div>
+    <div>
+      <div class="fc-head">Security</div>
+      <a class="fc-link" href="mailto:sajalhaldar2004@gmail.com">Bug Bounty</a>
+      <a class="fc-link" href="#contact">Responsible Disclosure</a>
+      <a class="fc-link" href="#">Privacy Policy</a>
+      <a class="fc-link" href="#">Terms</a>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <span>© 2026 SyncWorld Together. Founded by Sajal Haldar (Sudo0xSajal). All rights reserved.</span>
+    <span style="font-family:var(--mono);font-size:.68rem">Built with 🔐 · syncworld.tech</span>
+  </div>
+</footer>
+
+<script>
+'use strict';
+
+/* ══ CURSOR ══ */
+const cur=document.getElementById('cur'),curR=document.getElementById('cur-r');
+let mx=0,my=0,rx=0,ry=0;
+document.addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY;cur.style.cssText+=`;left:${mx}px;top:${my}px`});
+(function animCursor(){rx+=(mx-rx)*.14;ry+=(my-ry)*.14;curR.style.cssText+=`;left:${rx}px;top:${ry}px`;requestAnimationFrame(animCursor)})();
+document.querySelectorAll('a,button,.prod-card,.prod-featured,.testi-card,.blog-card,.tech-badge,.val-card,.fskill').forEach(el=>{
+  el.addEventListener('mouseenter',()=>document.body.classList.add('hover-active'));
+  el.addEventListener('mouseleave',()=>document.body.classList.remove('hover-active'));
+});
+
+/* ══ TICKER ══ */
+const tickerItems=[
+  {dot:'tick-green',text:'ENCRYPTION STATUS',val:'AES-256-GCM ACTIVE'},
+  {dot:'tick-blue',text:'ACTIVE USERS',val:'14,892'},
+  {dot:'tick-green',text:'UPTIME',val:'99.99%'},
+  {dot:'tick-red',text:'THREATS BLOCKED TODAY',val:'2,847'},
+  {dot:'tick-blue',text:'LATENCY',val:'48ms AVG'},
+  {dot:'tick-green',text:'LINKPHONE STATUS',val:'ONLINE'},
+  {dot:'tick-blue',text:'COUNTRIES COVERED',val:'40+'},
+  {dot:'tick-green',text:'TLS VERSION',val:'1.3 ENFORCED'},
+  {dot:'tick-blue',text:'WebRTC CONNECTIONS',val:'SECURE'},
+  {dot:'tick-red',text:'CVE PATCHES',val:'CURRENT'},
+];
+const ti=document.getElementById('tickerInner');
+[...tickerItems,...tickerItems].forEach(i=>{
+  ti.innerHTML+=`<div class="ticker-item"><div class="ticker-dot ${i.dot}"></div><span>${i.text}:</span><span class="tick-val">${i.val}</span></div>`;
+});
+
+/* ══ HEADER ══ */
+const hdr=document.getElementById('hdr');
+window.addEventListener('scroll',()=>hdr.classList.toggle('solid',scrollY>50),{passive:true});
+
+/* ══ MOBILE NAV ══ */
+const mobNav=document.getElementById('mobNav');
+document.getElementById('ham').addEventListener('click',()=>{mobNav.classList.add('on');document.body.style.overflow='hidden'});
+document.getElementById('mobClose').addEventListener('click',()=>{mobNav.classList.remove('on');document.body.style.overflow=''});
+document.querySelectorAll('.mnl').forEach(l=>l.addEventListener('click',()=>{mobNav.classList.remove('on');document.body.style.overflow=''}));
+
+/* ══ THREE.JS HERO GLOBE ══ */
+(()=>{
+  const canvas=document.getElementById('c3d');
+  const R=new THREE.WebGLRenderer({canvas,alpha:true,antialias:true});
+  R.setPixelRatio(Math.min(devicePixelRatio,2));
+  R.setSize(innerWidth,innerHeight);
+  const S=new THREE.Scene(),C=new THREE.PerspectiveCamera(55,innerWidth/innerHeight,.1,1000);
+  C.position.z=5;
+
+  // Globe
+  const gM=new THREE.SphereGeometry(1.6,80,80);
+  const gMat=new THREE.MeshPhongMaterial({color:0x060620,emissive:0x001030,transparent:true,opacity:.9});
+  const globe=new THREE.Mesh(gM,gMat);S.add(globe);
+
+  // Wire
+  const wM=new THREE.SphereGeometry(1.62,32,32);
+  const wMat=new THREE.MeshBasicMaterial({color:0x1e90ff,wireframe:true,transparent:true,opacity:.09});
+  S.add(new THREE.Mesh(wM,wMat));
+
+  // Rings
+  const mkRing=(r,c,op,rx,ry)=>{
+    const m=new THREE.Mesh(new THREE.TorusGeometry(r,.012,16,120),
+      new THREE.MeshBasicMaterial({color:c,transparent:true,opacity:op}));
+    m.rotation.x=rx;m.rotation.y=ry||0;S.add(m);return m;
+  };
+  const r1=mkRing(1.9,0x06ffd8,.55,Math.PI/2.5);
+  const r2=mkRing(2.1,0x7c3aed,.3,Math.PI/3,Math.PI/4);
+  const r3=mkRing(2.3,0x1e90ff,.15,Math.PI/5,Math.PI/6);
+
+  // Network nodes on globe surface
+  const nodeGeo=new THREE.SphereGeometry(.04,8,8);
+  const nodeMat=new THREE.MeshBasicMaterial({color:0x06ffd8});
+  for(let i=0;i<20;i++){
+    const phi=Math.random()*Math.PI*2,theta=Math.random()*Math.PI;
+    const node=new THREE.Mesh(nodeGeo,nodeMat.clone());
+    node.material.color.setHSL(Math.random()*.2+.5,1,.6);
+    node.position.set(1.63*Math.sin(theta)*Math.cos(phi),1.63*Math.cos(theta),1.63*Math.sin(theta)*Math.sin(phi));
+    globe.add(node);
+  }
+
+  // Particles
+  const pG=new THREE.BufferGeometry();
+  const pP=new Float32Array(1200*3);
+  for(let i=0;i<3600;i++)pP[i]=(Math.random()-.5)*22;
+  pG.setAttribute('position',new THREE.BufferAttribute(pP,3));
+  S.add(new THREE.Points(pG,new THREE.PointsMaterial({color:0x1e90ff,size:.03,transparent:true,opacity:.35})));
+
+  // Lights
+  S.add(new THREE.AmbientLight(0x0a0a30,3));
+  const dl=new THREE.DirectionalLight(0x1e90ff,4);dl.position.set(5,5,5);S.add(dl);
+  const pl=new THREE.PointLight(0x06ffd8,2.5,10);pl.position.set(-3,2,3);S.add(pl);
+  const pl2=new THREE.PointLight(0x7c3aed,2,10);pl2.position.set(3,-2,-3);S.add(pl2);
+
+  let msX=0,msY=0;
+  document.addEventListener('mousemove',e=>{msX=(e.clientX/innerWidth-.5)*.6;msY=(e.clientY/innerHeight-.5)*.4});
+  window.addEventListener('resize',()=>{C.aspect=innerWidth/innerHeight;C.updateProjectionMatrix();R.setSize(innerWidth,innerHeight)});
+
+  let t=0;
+  (function anim(){requestAnimationFrame(anim);t+=.004;
+    globe.rotation.y+=.0025;
+    r1.rotation.z+=.0035;r2.rotation.z-=.0025;r2.rotation.x+=.001;r3.rotation.z+=.0015;
+    C.position.x+=(msX-C.position.x)*.05;C.position.y+=(-msY-C.position.y)*.05;
+    C.lookAt(S.position);
+    pl.position.set(Math.sin(t)*4,Math.cos(t*.7)*3,2);
+    R.render(S,C);
+  })();
+})();
+
+/* ══ MATRIX RAIN ══ */
+(()=>{
+  const c=document.getElementById('matrix-c');
+  c.width=innerWidth;c.height=200;
+  const ctx=c.getContext('2d');
+  const chars='アイウエオカキクケコサシスセソタチツテトナニヌネノ0123456789ABCDEF<>{}[]//\\';
+  const cols=Math.floor(innerWidth/14);
+  const drops=Array(cols).fill(1);
+  setInterval(()=>{
+    ctx.fillStyle='rgba(4,4,12,.065)';ctx.fillRect(0,0,c.width,c.height);
+    ctx.fillStyle='rgba(6,255,216,.45)';ctx.font='12px JetBrains Mono,monospace';
+    drops.forEach((y,i)=>{
+      ctx.fillText(chars[Math.floor(Math.random()*chars.length)],i*14,y*14);
+      if(y*14>c.height&&Math.random()>.975)drops[i]=0;
+      drops[i]++;
+    });
+  },55);
+  window.addEventListener('resize',()=>{c.width=innerWidth});
+})();
+
+/* ══ SCROLL REVEAL ══ */
+const rvEls=document.querySelectorAll('.rv,.rv-l,.rv-r');
+const io=new IntersectionObserver(entries=>{
+  entries.forEach((e,i)=>{if(e.isIntersecting){setTimeout(()=>e.target.classList.add('on'),i*70);io.unobserve(e.target)}});
+},{threshold:.1});
+rvEls.forEach(el=>io.observe(el));
+
+/* ══ COUNTER ══ */
+function countUp(el,target,suffix,dec=0){
+  let n=0;const dur=2200,step=16,inc=target/(dur/step);
+  const t=setInterval(()=>{n=Math.min(n+inc,target);el.textContent=(dec?n.toFixed(dec):Math.floor(n))+suffix;if(n>=target)clearInterval(t)},step);
+}
+const sIO=new IntersectionObserver(e=>{
+  if(e[0].isIntersecting){
+    countUp(document.getElementById('s1'),50,'K+');
+    countUp(document.getElementById('s2'),99.99,'%',2);
+    countUp(document.getElementById('s3'),40,'+');
+    countUp(document.getElementById('s4'),5,'');
+    sIO.disconnect();
+  }
+},{threshold:.2});
+sIO.observe(document.querySelector('.stats-row'));
+
+/* ══ THREAT MAP ══ */
+(()=>{
+  const wrap=document.getElementById('threat-canvas-wrap');
+  const canvas=document.getElementById('threat-canvas');
+  const W=wrap.offsetWidth,H=360;
+  canvas.width=W;canvas.height=H;
+  const ctx=canvas.getContext('2d');
+
+  // Simple world map dots
+  const cities=[
+    {x:.12,y:.35,name:'New York'},{x:.23,y:.28,name:'London'},
+    {x:.27,y:.4,name:'Lagos'},{x:.35,y:.25,name:'Moscow'},
+    {x:.52,y:.32,name:'Mumbai'},{x:.7,y:.3,name:'Beijing'},
+    {x:.82,y:.45,name:'Tokyo'},{x:.15,y:.6,name:'São Paulo'},
+    {x:.55,y:.45,name:'Kolkata'},{x:.78,y:.6,name:'Sydney'},
+    {x:.4,y:.22,name:'Berlin'},{x:.48,y:.35,name:'Cairo'},
+  ];
+
+  let pulses=[],lines=[],blockedCount=0,ipCount=Math.floor(Math.random()*500+1200);
+
+  function rand(min,max){return Math.random()*(max-min)+min}
+
+  function spawnPulse(){
+    const from=cities[Math.floor(Math.random()*cities.length)];
+    const to=cities[Math.floor(Math.random()*cities.length)];
+    if(from===to)return;
+    const blocked=Math.random()>.4;
+    pulses.push({fx:from.x*W,fy:from.y*H,tx:to.x*W,ty:to.y*H,t:0,blocked,fromName:from.name,toName:to.name});
+    if(blocked){blockedCount++;document.getElementById('blocked-count').textContent=blockedCount}
+    ipCount+=Math.floor(Math.random()*3-1);
+    document.getElementById('ip-count').textContent=ipCount;
+    addEvent(from.name,to.name,blocked);
+  }
+
+  function addEvent(from,to,blocked){
+    const feed=document.getElementById('ts-feed');
+    const types=['Port Scan','Brute Force','SQLi Attempt','XSS Probe','C2 Beacon','DDoS Packet'];
+    const type=blocked?types[Math.floor(Math.random()*types.length)]:'Normal Traffic';
+    const col=blocked?'var(--red)':'var(--green)';
+    const now=new Date();const time=now.getHours().toString().padStart(2,'0')+':'+now.getMinutes().toString().padStart(2,'0')+':'+now.getSeconds().toString().padStart(2,'0');
+    const div=document.createElement('div');
+    div.className='threat-evt';
+    div.innerHTML=`<div class="te-dot" style="background:${col};box-shadow:0 0 6px ${col}"></div>
+      <div class="te-info"><div class="te-type" style="color:${col}">${type}</div><div class="te-loc">${from} → ${to}</div></div>
+      <div class="te-time">${time}</div>`;
+    feed.prepend(div);
+    while(feed.children.length>18)feed.removeChild(feed.lastChild);
+  }
+
+  function drawFrame(){
+    ctx.clearRect(0,0,W,H);
+    // Background
+    ctx.fillStyle='#04040c';ctx.fillRect(0,0,W,H);
+    // Grid
+    ctx.strokeStyle='rgba(30,144,255,0.04)';ctx.lineWidth=1;
+    for(let x=0;x<W;x+=40){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,H);ctx.stroke()}
+    for(let y=0;y<H;y+=40){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke()}
+
+    // Cities
+    cities.forEach(c=>{
+      const cx=c.x*W,cy=c.y*H;
+      ctx.beginPath();ctx.arc(cx,cy,3,0,Math.PI*2);
+      ctx.fillStyle='rgba(30,144,255,0.8)';ctx.fill();
+      ctx.beginPath();ctx.arc(cx,cy,7,0,Math.PI*2);
+      ctx.strokeStyle='rgba(30,144,255,0.25)';ctx.lineWidth=1;ctx.stroke();
+      ctx.fillStyle='rgba(100,180,255,0.6)';ctx.font='9px JetBrains Mono,monospace';
+      ctx.fillText(c.name,cx+6,cy-4);
+    });
+
+    // Pulses
+    pulses=pulses.filter(p=>{
+      p.t+=0.022;
+      if(p.t>1)return false;
+      const x=p.fx+(p.tx-p.fx)*p.t;
+      const y=p.fy+(p.ty-p.fy)*p.t;
+      const col=p.blocked?'255,45,85':'6,255,216';
+      // Trail
+      const grad=ctx.createLinearGradient(p.fx,p.fy,x,y);
+      grad.addColorStop(0,`rgba(${col},0)`);
+      grad.addColorStop(1,`rgba(${col},0.5)`);
+      ctx.beginPath();ctx.moveTo(p.fx,p.fy);ctx.lineTo(x,y);
+      ctx.strokeStyle=grad;ctx.lineWidth=1.5;ctx.stroke();
+      // Dot
+      ctx.beginPath();ctx.arc(x,y,4,0,Math.PI*2);
+      ctx.fillStyle=`rgba(${col},0.9)`;ctx.fill();
+      ctx.beginPath();ctx.arc(x,y,8,0,Math.PI*2);
+      ctx.fillStyle=`rgba(${col},0.2)`;ctx.fill();
+      return true;
+    });
+
+    requestAnimationFrame(drawFrame);
+  }
+
+  drawFrame();
+  setInterval(spawnPulse,900);
+  // Spawn initial events
+  for(let i=0;i<5;i++)setTimeout(spawnPulse,i*200);
+})();
+
+/* ══ TYPING TERMINAL ══ */
+(()=>{
+  const lines=[
+    {t:'<span style="color:#00e878">sajal@syncworld</span><span style="color:#06ffd8">:~$</span> <span style="color:#eeeeff">nmap -sV 192.168.1.0/24</span>'},
+    {t:'<span style="color:#7070a0">Starting Nmap 7.94 ( https://nmap.org )</span>',d:800},
+    {t:'<span style="color:#a855f7">PORT</span>   <span style="color:#a855f7">STATE</span>  <span style="color:#a855f7">SERVICE</span>',d:500},
+    {t:'<span style="color:#00e878">443/tcp open  https</span>',d:200},
+    {t:'<span style="color:#00e878">22/tcp  open  ssh</span>',d:150},
+    {t:'<span style="color:#ff2d55">8080/tcp open  http-proxy  ⚠ VULN</span>',d:200},
+    {t:'<span style="color:#06ffd8">// 3 hosts up · Scan done in 2.41s</span>',d:400},
+    {t:'',d:300},
+    {t:'<span style="color:#00e878">sajal@syncworld</span><span style="color:#06ffd8">:~$</span> <span style="color:#eeeeff">syncworld status</span>',d:600},
+    {t:'<span style="color:#06ffd8">✔</span> <span style="color:#eeeeff">LinkPhone</span>  <span style="color:#00e878">ONLINE</span>',d:200},
+    {t:'<span style="color:#06ffd8">✔</span> <span style="color:#eeeeff">Encryption</span> <span style="color:#00e878">AES-256-GCM</span>',d:150},
+    {t:'<span style="color:#06ffd8">✔</span> <span style="color:#eeeeff">Firewall</span>   <span style="color:#00e878">ACTIVE</span>',d:150},
+    {t:'<span style="color:#06ffd8">✔</span> <span style="color:#eeeeff">Uptime</span>     <span style="color:#00e878">99.99%</span>',d:150},
+    {t:'<span style="color:#a855f7">// All systems nominal — Sudo0xSajal</span>',d:300},
+  ];
+  const body=document.getElementById('terminal-body');
+  let i=0;
+  function typeLine(){
+    if(i>=lines.length){
+      setTimeout(()=>{body.innerHTML='';i=0;typeLine()},3000);return;
+    }
+    const l=lines[i];
+    body.innerHTML+=l.t+'<br/>';
+    body.scrollTop=body.scrollHeight;
+    i++;
+    setTimeout(typeLine,l.d||300);
+  }
+  typeLine();
+})();
+
+/* ══ CONTACT FORM ══ */
+function submitForm(){
+  const n=document.getElementById('fn').value.trim();
+  const e=document.getElementById('fe').value.trim();
+  const s=document.getElementById('fs').value;
+  const m=document.getElementById('fm').value.trim();
+  const st=document.getElementById('fStatus');
+  const btn=document.getElementById('fBtn');
+  if(!n||!e||!m){st.textContent='// Please fill in all required fields.';st.className='f-status err';return}
+  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e)){st.textContent='// Invalid email format.';st.className='f-status err';return}
+  btn.textContent='Transmitting...';btn.disabled=true;
+  setTimeout(()=>{
+    st.textContent='// Message received. Response within 24 hours. — Sajal';
+    st.className='f-status ok';
+    btn.textContent='Send Message ↗';btn.disabled=false;
+    ['fn','fe','fm'].forEach(id=>document.getElementById(id).value='');
+    document.getElementById('fs').value='';
+  },1400);
+}
+
+/* ══ PARALLAX ══ */
+window.addEventListener('scroll',()=>{
+  const y=scrollY;
+  document.querySelector('.fcards').style.transform=`translateY(${y*.08}px)`;
+},{ passive:true });
+
+/* ══ ORBIT NODES ══ */
+(()=>{
+  const orbits=[document.getElementById('o1'),document.getElementById('o2')];
+  const colors=[['#1e90ff','#06ffd8'],['#7c3aed','#a855f7']];
+  orbits.forEach((orb,oi)=>{
+    for(let i=0;i<3;i++){
+      const node=document.createElement('div');
+      const angle=(i/3)*360;
+      const r=(oi===0?90:140);
+      node.className='orb-node';
+      node.style.cssText=`
+        background:${colors[oi][i%2]};
+        box-shadow:0 0 10px ${colors[oi][i%2]};
+        width:${oi===0?8:6}px;height:${oi===0?8:6}px;
+        left:calc(50% + ${r}px * cos(${angle}deg));
+        top:calc(50% + ${r}px * sin(${angle}deg));
+      `;
+      orb.parentElement.appendChild(node);
+    }
+  });
+})();
+
+</script>
+</body>
+</html>
